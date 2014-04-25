@@ -1,17 +1,37 @@
+
 object BowlingScore {
+
+  //have to create an extractor to get at the proper value
+  // I have to extract stuff that might be a digit or -
+  object BowlingNumber {
+    def unapply(value: Char): Option[Int] = {
+      if (value == '-') {
+        Some(0)
+      } else if (value.isDigit) {
+        Some(value.asDigit)
+      } else {
+        None
+      }
+    }
+  }
+
+
   def apply(frames: String) = {
 
     def calculateStrike(fl: List[Char]): Int = {
-      //Assuming valid game
-      val r1 = fl.head
-      val r2 = fl.tail.head
-      val rolls = if (r2 == '/') {
-        //If the second roll is a spare, then the combination of the two is 10
-        10
-      } else {
-        //Otherwise, we're going to count up that stuff, and it's either another strike or a number
-        scorePins(r1) + scorePins(r2)
+      val pair = (fl.head, fl.tail.head)
+      val rolls = pair match {
+        case (_, '/') => {
+          10
+        }
+        case (BowlingNumber(one), BowlingNumber(two)) => {
+          one + two
+        }
+        case (one, two) => {
+          scorePins(one) + scorePins(two)
+        }
       }
+
       10 + rolls
     }
 
@@ -20,12 +40,10 @@ object BowlingScore {
     }
 
     def scorePins(pins: Char): Int = {
-      if (pins == '-') {
-        0
-      } else if (pins == 'X') {
-        10
-      } else {
-        pins.asDigit
+      pins match {
+        case '-' => 0
+        case 'X' => 10
+        case x => x.asDigit
       }
     }
 
@@ -35,26 +53,24 @@ object BowlingScore {
         score
       } else {
         val pins = fl.head
-        //I have a number of pins hit
-        // Could be - [1-9] / or X
-        if (pins.isDigit || pins == '-') {
-          //If we're starting as a number, we'll examine the two in a pair
-          val nextPins = fl.tail.head
-          val nextScore = if (nextPins == '-' || nextPins.isDigit) {
-            scorePins(nextPins)
-          } else {
-            //It's a spare -- This is kind of icky
-            calculateSpare(fl.tail.tail) + (10 - scorePins(pins))
-          }
 
-          //At this point, we've done two numbers, or a number and a spare, add one to the frame index
-          calculateScore(frameIndex + 1, score + scorePins(pins) + nextScore, fl.tail.tail, pins)
-        } else if (pins == 'X') {
-          //Strike!
-          calculateScore(frameIndex + 1, score + calculateStrike(fl.tail), fl.tail, pins)
-        } else {
-          //TODO: should not need this, need to better scope my crap
-          0
+        pins match {
+          case BowlingNumber(x) => {
+            //It's a number lets get two items
+            val nextRoll = fl.tail.head
+            val frameScore = nextRoll match {
+              case BowlingNumber(y) => {
+                y + x
+              }
+              case '/' => {
+                calculateSpare(fl.tail.tail) + (10 - x) + x
+              }
+            }
+            calculateScore(frameIndex + 1, score + frameScore, fl.tail.tail, nextRoll)
+          }
+          case 'X' => {
+            calculateScore(frameIndex + 1, score + calculateStrike(fl.tail), fl.tail, pins)
+          }
         }
       }
     }
