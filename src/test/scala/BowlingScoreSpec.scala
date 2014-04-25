@@ -9,7 +9,8 @@ class BowlingScoreSpec extends FunSpec with Matchers {
       "-1-1-1-1-1-1-1-1-1-1" -> 10,
       "-1-2-3-4-5-6-7-8-944" -> 53,
       "9-8-7-6-5-4-3-2-1---" -> 45,
-      "XXXXXXXXXXXX" -> 300
+      "XXXXXXXXXXXX" -> 300,
+      "3423114/12XX-99---" -> 85
     )
 
     tests.map(pair => {
@@ -21,7 +22,7 @@ class BowlingScoreSpec extends FunSpec with Matchers {
       }
     })
 
-    it("1/2/3/4/5/6/7/8/9/-/4/ as something") {
+    it("1/2/3/4/5/6/7/8/9/-/46 as something") {
       pending
     }
   }
