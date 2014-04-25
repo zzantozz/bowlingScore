@@ -12,22 +12,25 @@ object BowlingScore {
     def calculateStrike(fl: List[Char]): Int = {
       //Assuming valid game
       val r1 = fl.head
-      val nextScore = if (r1.isDigit || r1 == '-') {
-        scorePins(r1)
-      } else {
-        10
-      }
-
       val r2 = fl.tail.head
-      val nextNextScore = if (r2.isDigit || r2 == '-') {
-        scorePins(r2)
-      } else {
+      val rolls = if (r2 == '/') {
         10
+      } else {
+        val nextScore = if (r1.isDigit || r1 == '-') {
+          scorePins(r1)
+        } else {
+          10
+        }
+
+        val nextNextScore = if (r2.isDigit || r2 == '-') {
+          scorePins(r2)
+        } else {
+          10
+        }
+        nextScore + nextNextScore
       }
 
-      val strikeValue = nextScore + nextNextScore + 10
-      println(s" ---- StrikeValue ${strikeValue}")
-
+      val strikeValue =  10 + rolls
       strikeValue
     }
 
@@ -38,8 +41,6 @@ object BowlingScore {
       } else {
         scorePins(r1)
       }
-      println(s" ---- spareValue ${spareValue}")
-
       spareValue
     }
 
@@ -52,7 +53,6 @@ object BowlingScore {
     }
 
     def calculateScore(frameIndex: Int, score: Int, fl: List[Char], previous: Char): Int = {
-      println(s"${frameIndex} -> ${score}")
       if (fl.isEmpty || frameIndex == 10) {
         score
       } else {
@@ -75,7 +75,7 @@ object BowlingScore {
 
         } else if (pins == 'X') {
           //Strike!
-          calculateScore(frameIndex + 1, score  + calculateStrike(fl.tail), fl.tail, pins)
+          calculateScore(frameIndex + 1, score + calculateStrike(fl.tail), fl.tail, pins)
         } else {
           //TODO: should not need this, need to better scope my crap
           0
