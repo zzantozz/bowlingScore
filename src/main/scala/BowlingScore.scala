@@ -1,52 +1,29 @@
 object BowlingScore {
   def apply(frames: String) = {
 
-
-    def scoreToPins(rolls: String) = {
-      //Convert the list of rolls into something uniform for frames
-    }
-
-
-    val pinsList = frames.toList
-
     def calculateStrike(fl: List[Char]): Int = {
       //Assuming valid game
       val r1 = fl.head
       val r2 = fl.tail.head
       val rolls = if (r2 == '/') {
+        //If the second roll is a spare, then the combination of the two is 10
         10
       } else {
-        val nextScore = if (r1.isDigit || r1 == '-') {
-          scorePins(r1)
-        } else {
-          10
-        }
-
-        val nextNextScore = if (r2.isDigit || r2 == '-') {
-          scorePins(r2)
-        } else {
-          10
-        }
-        nextScore + nextNextScore
+        //Otherwise, we're going to count up that stuff, and it's either another strike or a number
+        scorePins(r1) + scorePins(r2)
       }
-
-      val strikeValue =  10 + rolls
-      strikeValue
+      10 + rolls
     }
 
     def calculateSpare(fl: List[Char]): Int = {
-      val r1 = fl.head
-      val spareValue = if (r1 == 'X') {
-        10
-      } else {
-        scorePins(r1)
-      }
-      spareValue
+      scorePins(fl.head)
     }
 
     def scorePins(pins: Char): Int = {
       if (pins == '-') {
         0
+      } else if (pins == 'X') {
+        10
       } else {
         pins.asDigit
       }
@@ -54,6 +31,7 @@ object BowlingScore {
 
     def calculateScore(frameIndex: Int, score: Int, fl: List[Char], previous: Char): Int = {
       if (fl.isEmpty || frameIndex == 10) {
+        //If we're all done, or we hit the 10th frame
         score
       } else {
         val pins = fl.head
@@ -65,14 +43,12 @@ object BowlingScore {
           val nextScore = if (nextPins == '-' || nextPins.isDigit) {
             scorePins(nextPins)
           } else {
-            //It's a spare
-            //This is kind of icky
+            //It's a spare -- This is kind of icky
             calculateSpare(fl.tail.tail) + (10 - scorePins(pins))
           }
-          //If it's a number, add it to the score and keep going
-          //It's also the first part of one frame, so don't increment it
-          calculateScore(frameIndex + 1, score + scorePins(pins) + nextScore, fl.tail.tail, pins)
 
+          //At this point, we've done two numbers, or a number and a spare, add one to the frame index
+          calculateScore(frameIndex + 1, score + scorePins(pins) + nextScore, fl.tail.tail, pins)
         } else if (pins == 'X') {
           //Strike!
           calculateScore(frameIndex + 1, score + calculateStrike(fl.tail), fl.tail, pins)
@@ -83,15 +59,7 @@ object BowlingScore {
       }
     }
 
+    val pinsList = frames.toList
     calculateScore(0, 0, pinsList, '-')
-
-
-    //    frames.toList.foldLeft(0)((a,b) => {
-    //      if(b == '-') {
-    //        a
-    //      } else {
-    //        a + b.asDigit
-    //      }
-    //    })
   }
 }
