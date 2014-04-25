@@ -25,18 +25,20 @@ object BowlingScore {
         10
       }
 
-      nextScore + nextNextScore
+      val strikeValue = nextScore + nextNextScore + 10
+      println(s" ---- StrikeValue ${strikeValue}")
+
+      strikeValue
     }
 
     def calculateSpare(fl: List[Char]): Int = {
       val r1 = fl.head
       val spareValue = if (r1 == 'X') {
-        calculateStrike(fl.tail)
+        10
       } else {
         scorePins(r1)
       }
-
-      println(s" ------ spareValue ${spareValue}")
+      println(s" ---- spareValue ${spareValue}")
 
       spareValue
     }
@@ -73,7 +75,7 @@ object BowlingScore {
 
         } else if (pins == 'X') {
           //Strike!
-          calculateScore(frameIndex + 1, score + 10 + calculateStrike(fl.tail), fl.tail, pins)
+          calculateScore(frameIndex + 1, score  + calculateStrike(fl.tail), fl.tail, pins)
         } else {
           //TODO: should not need this, need to better scope my crap
           0
