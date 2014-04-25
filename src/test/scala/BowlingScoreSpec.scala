@@ -25,6 +25,7 @@ class BowlingScoreSpec extends FunSpec with Matchers {
     it("1/2/3/4/5/6/7/8/9/-/46 as something") {
       pending
     }
+
   }
 
 }

@@ -2,7 +2,7 @@ object BowlingScore {
   def apply(frames: String) = {
 
 
-    def scoreToPins(rolls:String) ={
+    def scoreToPins(rolls: String) = {
       //Convert the list of rolls into something uniform for frames
     }
 
@@ -30,11 +30,15 @@ object BowlingScore {
 
     def calculateSpare(fl: List[Char]): Int = {
       val r1 = fl.head
-      if(r1 == 'X') {
+      val spareValue = if (r1 == 'X') {
         calculateStrike(fl.tail)
       } else {
         scorePins(r1)
       }
+
+      println(s" ------ spareValue ${spareValue}")
+
+      spareValue
     }
 
     def scorePins(pins: Char): Int = {
@@ -46,6 +50,7 @@ object BowlingScore {
     }
 
     def calculateScore(frameIndex: Int, score: Int, fl: List[Char], previous: Char): Int = {
+      println(s"${frameIndex} -> ${score}")
       if (fl.isEmpty || frameIndex == 10) {
         score
       } else {
@@ -55,24 +60,20 @@ object BowlingScore {
         if (pins.isDigit || pins == '-') {
           //If we're starting as a number, we'll examine the two in a pair
           val nextPins = fl.tail.head
-          val nextScore = if(nextPins == '-' || nextPins.isDigit){
+          val nextScore = if (nextPins == '-' || nextPins.isDigit) {
             scorePins(nextPins)
           } else {
             //It's a spare
-            calculateSpare(fl.tail)
+            //This is kind of icky
+            calculateSpare(fl.tail.tail) + (10 - scorePins(pins))
           }
           //If it's a number, add it to the score and keep going
           //It's also the first part of one frame, so don't increment it
-          calculateScore(frameIndex+1, score + scorePins(pins) + nextScore, fl.tail.tail, pins)
+          calculateScore(frameIndex + 1, score + scorePins(pins) + nextScore, fl.tail.tail, pins)
 
-        } else if (pins == '/' || pins == 'X') {
-          if (pins == '/') {
-            //Spare!
-            calculateScore(frameIndex + 1, score + scorePins(previous) + calculateStrike(fl.tail), fl.tail, pins)
-          } else {
-            //Strike!
-            calculateScore(frameIndex + 1, score + 10 + calculateStrike(fl.tail), fl.tail, pins)
-          }
+        } else if (pins == 'X') {
+          //Strike!
+          calculateScore(frameIndex + 1, score + 10 + calculateStrike(fl.tail), fl.tail, pins)
         } else {
           //TODO: should not need this, need to better scope my crap
           0
