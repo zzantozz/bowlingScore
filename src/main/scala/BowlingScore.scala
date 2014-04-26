@@ -1,81 +1,28 @@
-
 object BowlingScore {
 
-  //have to create an extractor to get at the proper value
-  // I have to extract stuff that might be a digit or -
-  object BowlingNumber {
-    def unapply(value: Char): Option[Int] = {
-      if (value == '-') {
-        Some(0)
-      } else if (value.isDigit) {
-        Some(value.asDigit)
-      } else {
-        None
-      }
+  def apply(frameString: String) = {
+    score(frameString.toList, 10, 0)
+  }
+
+  def score(frameString: List[Char], remainingFrames: Int, acc: Int): Int = {
+    (frameString, remainingFrames) match {
+      case (_, 0) => acc
+      case ('X' :: h2 :: h3 :: t, _) => score(h2::h3::t, remainingFrames - 1, acc + 10 + pinsBowled(h2, h3))
+      case (h1::'/'::h3::t, _) => score(h3::t, remainingFrames - 1, acc + 10 + pinsBowled(h3))
+      case (h1::h2::t, _) => score(t, remainingFrames - 1, acc + pinsBowled(h1, h2))
     }
   }
 
-
-  def apply(frames: String) = {
-
-    def calculateStrike(fl: List[Char]): Int = {
-      val pair = (fl.head, fl.tail.head)
-      val rolls = pair match {
-        case (_, '/') => {
-          10
-        }
-        case (BowlingNumber(one), BowlingNumber(two)) => {
-          one + two
-        }
-        case (one, two) => {
-          scorePins(one) + scorePins(two)
-        }
-      }
-
-      10 + rolls
+  def pinsBowled(C: Char): Int = {
+    C match {
+      case '-' => 0
+      case 'X' => 10
+      case x   => x.asDigit
     }
+  }
 
-    def calculateSpare(fl: List[Char]): Int = {
-      scorePins(fl.head)
-    }
-
-    def scorePins(pins: Char): Int = {
-      pins match {
-        case '-' => 0
-        case 'X' => 10
-        case x => x.asDigit
-      }
-    }
-
-    def calculateScore(frameIndex: Int, score: Int, fl: List[Char], previous: Char): Int = {
-      if (fl.isEmpty || frameIndex == 10) {
-        //If we're all done, or we hit the 10th frame
-        score
-      } else {
-        val pins = fl.head
-
-        pins match {
-          case BowlingNumber(x) => {
-            //It's a number lets get two items
-            val nextRoll = fl.tail.head
-            val frameScore = nextRoll match {
-              case BowlingNumber(y) => {
-                y + x
-              }
-              case '/' => {
-                calculateSpare(fl.tail.tail) + (10 - x) + x
-              }
-            }
-            calculateScore(frameIndex + 1, score + frameScore, fl.tail.tail, nextRoll)
-          }
-          case 'X' => {
-            calculateScore(frameIndex + 1, score + calculateStrike(fl.tail), fl.tail, pins)
-          }
-        }
-      }
-    }
-
-    val pinsList = frames.toList
-    calculateScore(0, 0, pinsList, '-')
+  def pinsBowled(C: Char, D: Char): Int = (C, D) match {
+    case (_, '/') => 10
+    case (x, y)   => pinsBowled(x) + pinsBowled(y)
   }
 }
